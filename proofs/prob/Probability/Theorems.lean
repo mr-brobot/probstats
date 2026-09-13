@@ -21,26 +21,22 @@ theorem nothing_never_happens : P ∅ = 0 := by
 
 theorem prob_subset_leq : A ⊆ B → (P A) ≤ (P B) := by
   rw [subset_def]
-
   sorry
 
 theorem prob_ssubset_leq : A ⊂ B → (P A) ≤ (P B) := by
-  -- A ⊂ B, C = A \ B → A ∪ C = B
   rw [ssubset_def]
-
   sorry
 
 lemma prob_leq_one : (P A) ≤ 1 := by
-  have h := normalized Ω P
-  -- prob_subset_leq
-  sorry
+  have h := prob_subset_leq Ω A univ P
+  specialize h (subset_univ A)
+  rw [normalized Ω P] at h
+  exact h
 
 theorem prob_bt_zero_one : 0 ≤ (P A) ∧ (P A) ≤ 1 := by
   constructor 
   · have h := nonnegative Ω P A
     rw [← ge_iff_le]
-    apply h
-  · have h := prob_leq_one Ω A P
-    apply h
-    
+    exact h
+  · apply prob_leq_one Ω A P
 
