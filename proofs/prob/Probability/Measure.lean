@@ -1,0 +1,54 @@
+import Mathlib
+
+open Set
+
+namespace Probability
+
+structure ProbabilityMeasure (Ω : Type*) where
+  P : Set Ω → ℝ
+  nonneg : ∀ A, P A ≥ 0 
+  normal : P univ = 1
+  additive : ∀ ⦃A B⦄, Disjoint A B -> P (A ∪ B) = P A + P B
+
+theorem ProbabilityMeasure.prob_empty_zero {Ω} (M : ProbabilityMeasure Ω) : M.P ∅ = 0 := by
+  have h := M.additive
+  specialize h (disjoint_empty univ)
+
+  rw [union_empty univ, M.normal] at h
+  symm at h
+  
+  linarith only [h]
+
+theorem ProbabilityMeasure.prob_subset_leq (M : ProbabilityMeasure Ω) : A ⊆ B → (M.P A) ≤ (M.P B) := by
+  intro h 
+
+  let C := B \ A
+  have had := M.additive
+  have hdj : Disjoint A C := disjoint_sdiff_right
+  specialize had hdj
+
+  have hun : A ∪ C = B := union_sdiff_cancel h
+  rw [hun] at had
+  
+  have hnn : M.P C ≥ 0 := M.nonneg C
+
+  linarith only [had, hnn]
+
+theorem ProbabilityMeasure.prob_ssubset_leq (M : ProbabilityMeasure Ω) : A ⊂ B → (M.P A) ≤ (M.P B) := by
+  intro h
+  apply subset_of_ssubset at h
+  exact M.prob_subset_leq h
+
+lemma ProbabilityMeasure.prob_leq_one (M : ProbabilityMeasure Ω) : (M.P A) ≤ 1 := by
+  have hun := subset_univ A
+  have hlq := M.prob_subset_leq hun
+  rw [M.normal] at hlq
+  exact hlq
+
+theorem ProbabilityMeasure.prob_bt_zero_one (M : ProbabilityMeasure Ω) : 0 ≤ (M.P A) ∧ (M.P A) ≤ 1 := by
+  constructor 
+  · have h := M.nonneg A
+    rw [← ge_iff_le]
+    exact h
+  · apply M.prob_leq_one
+
