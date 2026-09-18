@@ -20,12 +20,24 @@ theorem nothing_never_happens : P ∅ = 0 := by
   linarith only [h]
 
 theorem prob_subset_leq : A ⊆ B → (P A) ≤ (P B) := by
-  rw [subset_def]
-  sorry
+  intro h 
+
+  let C := B \ A
+  have had := additive Ω A C P
+  have hdj : Disjoint A C := disjoint_sdiff_right
+  specialize had hdj
+
+  have hun : A ∪ C = B := union_sdiff_cancel h
+  rw [hun] at had
+  
+  have hnn : P C ≥ 0 := nonnegative Ω P C
+
+  linarith only [had, hnn]
 
 theorem prob_ssubset_leq : A ⊂ B → (P A) ≤ (P B) := by
-  rw [ssubset_def]
-  sorry
+  intro h
+  apply subset_of_ssubset at h
+  exact prob_subset_leq Ω A B P h
 
 lemma prob_leq_one : (P A) ≤ 1 := by
   have h := prob_subset_leq Ω A univ P
