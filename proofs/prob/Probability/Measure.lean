@@ -10,7 +10,7 @@ structure ProbabilityMeasure (Ω : Type*) where
   normal : P univ = 1
   additive : ∀ ⦃A B⦄, Disjoint A B -> P (A ∪ B) = P A + P B
 
-theorem ProbabilityMeasure.prob_empty_zero {Ω} (M : ProbabilityMeasure Ω) : M.P ∅ = 0 := by
+theorem ProbabilityMeasure.prob_empty_zero (M : ProbabilityMeasure Ω) : M.P ∅ = 0 := by
   have h := M.additive
   specialize h (disjoint_empty univ)
 
@@ -19,7 +19,7 @@ theorem ProbabilityMeasure.prob_empty_zero {Ω} (M : ProbabilityMeasure Ω) : M.
   
   linarith only [h]
 
-theorem ProbabilityMeasure.prob_subset_leq (M : ProbabilityMeasure Ω) : A ⊆ B → (M.P A) ≤ (M.P B) := by
+theorem ProbabilityMeasure.prob_subset_le (M : ProbabilityMeasure Ω) : A ⊆ B → (M.P A) ≤ (M.P B) := by
   intro h 
 
   let C := B \ A
@@ -34,21 +34,19 @@ theorem ProbabilityMeasure.prob_subset_leq (M : ProbabilityMeasure Ω) : A ⊆ B
 
   linarith only [had, hnn]
 
-theorem ProbabilityMeasure.prob_ssubset_leq (M : ProbabilityMeasure Ω) : A ⊂ B → (M.P A) ≤ (M.P B) := by
+theorem ProbabilityMeasure.prob_ssubset_le (M : ProbabilityMeasure Ω) : A ⊂ B → (M.P A) ≤ (M.P B) := by
   intro h
-  apply subset_of_ssubset at h
-  exact M.prob_subset_leq h
+  exact M.prob_subset_le h.subset
 
-lemma ProbabilityMeasure.prob_leq_one (M : ProbabilityMeasure Ω) : (M.P A) ≤ 1 := by
+theorem ProbabilityMeasure.prob_le_one (M : ProbabilityMeasure Ω) : (M.P A) ≤ 1 := by
   have hun := subset_univ A
-  have hlq := M.prob_subset_leq hun
+  have hlq := M.prob_subset_le hun
   rw [M.normal] at hlq
   exact hlq
 
 theorem ProbabilityMeasure.prob_bt_zero_one (M : ProbabilityMeasure Ω) : 0 ≤ (M.P A) ∧ (M.P A) ≤ 1 := by
   constructor 
   · have h := M.nonneg A
-    rw [← ge_iff_le]
     exact h
-  · apply M.prob_leq_one
+  · apply M.prob_le_one
 
