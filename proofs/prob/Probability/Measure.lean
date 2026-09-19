@@ -8,11 +8,11 @@ structure ProbabilityMeasure (Ω : Type*) where
   P : Set Ω → ℝ
   nonneg : ∀ A, P A ≥ 0 
   normal : P univ = 1
+  -- TODO: convert finite additivity to countable additivity
   additive : ∀ ⦃A B⦄, Disjoint A B -> P (A ∪ B) = P A + P B
 
 theorem ProbabilityMeasure.prob_empty_zero (M : ProbabilityMeasure Ω) : M.P ∅ = 0 := by
-  have h := M.additive
-  specialize h (disjoint_empty univ)
+  have h := M.additive (disjoint_empty univ)
 
   rw [union_empty univ, M.normal] at h
   symm at h
@@ -49,4 +49,20 @@ theorem ProbabilityMeasure.prob_bt_zero_one (M : ProbabilityMeasure Ω) : 0 ≤ 
   · have h := M.nonneg A
     exact h
   · apply M.prob_le_one
+
+theorem ProbabilityMeasure.prob_compl_eq_one_sub (M : ProbabilityMeasure Ω) : M.P Aᶜ = 1 - M.P A := by
+  have hd : Disjoint A Aᶜ := disjoint_compl_right
+
+  have ha : M.P A + M.P Aᶜ = 1 := by
+    have h := M.additive hd
+    rw [union_compl_self, M.normal] at h
+    symm at h
+    exact h
+
+  linarith only [ha]
+
+theorem ProbabilityMeasure.prob_union_eq_add_disjoint (M : ProbabilityMeasure Ω) (h : A ∩ B = ∅) :
+    M.P (A ∪ B) = M.P A + M.P B := by
+  rw [← disjoint_iff_inter_eq_empty] at h
+  exact M.additive h
 
