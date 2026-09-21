@@ -23,9 +23,7 @@ theorem ProbabilityMeasure.prob_subset_le (M : ProbabilityMeasure Ω) : A ⊆ B 
   intro h 
 
   let C := B \ A
-  have had := M.additive
-  have hdj : Disjoint A C := disjoint_sdiff_right
-  specialize had hdj
+  have had : M.P (A ∪ C) = M.P A + M.P C := M.additive disjoint_sdiff_right
 
   have hun : A ∪ C = B := union_sdiff_cancel h
   rw [hun] at had
@@ -39,25 +37,16 @@ theorem ProbabilityMeasure.prob_ssubset_le (M : ProbabilityMeasure Ω) : A ⊂ B
   exact M.prob_subset_le h.subset
 
 theorem ProbabilityMeasure.prob_le_one (M : ProbabilityMeasure Ω) : (M.P A) ≤ 1 := by
-  have hun := subset_univ A
-  have hlq := M.prob_subset_le hun
-  rw [M.normal] at hlq
-  exact hlq
+  have h := M.prob_subset_le (subset_univ A)
+  rw [M.normal] at h
+  exact h
 
-theorem ProbabilityMeasure.prob_bt_zero_one (M : ProbabilityMeasure Ω) : 0 ≤ (M.P A) ∧ (M.P A) ≤ 1 := by
-  constructor 
-  · have h := M.nonneg A
-    exact h
-  · apply M.prob_le_one
+theorem ProbabilityMeasure.prob_bt_zero_one (M : ProbabilityMeasure Ω) : 0 ≤ (M.P A) ∧ (M.P A) ≤ 1 :=
+  ⟨M.nonneg A, M.prob_le_one⟩
 
 theorem ProbabilityMeasure.prob_compl_eq_one_sub (M : ProbabilityMeasure Ω) : M.P Aᶜ = 1 - M.P A := by
-  have hd : Disjoint A Aᶜ := disjoint_compl_right
-
   have ha : M.P A + M.P Aᶜ = 1 := by
-    have h := M.additive hd
-    rw [union_compl_self, M.normal] at h
-    symm at h
-    exact h
+    rw [← M.additive disjoint_compl_right, union_compl_self, M.normal]
 
   linarith only [ha]
 
